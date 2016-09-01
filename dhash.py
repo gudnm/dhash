@@ -24,21 +24,21 @@ class DHash(object):
     def __init__(self, nodes, config={}):
         if not config:
             config = {
-                'resizing_method': 'ConsistentHashing',
-                'access_pattern': 'WriteAround',
-                'evection_strategy': 'LFU'
+                'resizing_method': ConsistentHashing,
+                'access_pattern': WriteAround,
+                'evection_strategy': LFU
             }
-        self.resizing_method = config['resizing_method']
-        self.access_pattern = config['access_pattern']
+        self.resizer = config['resizing_method']()
+        self.accessor = config['access_pattern']()
         self.nodes = nodes
 
     def read(self, key):
-        resizer = self.resizing_method()
-        nodeid = resizer.get_nodeid()
-        pass
+        nodeid = self.resizer.get_nodeid()
+        return self.nodes[nodeid].read(key)
 
     def write(self, key, value):
-        pass
+        nodeid = self.resizer.get_nodeid()
+        self.nodes[nodeid].write(key, value)
 
     def add_node(self, node):
         self.nodes.append(node)
@@ -51,15 +51,18 @@ class MockNode(object):
 
     Node will run in its own thread and emulate a separate machine.
     """
-    def __init__(self, size=1024):
+    def __init__(self, size=128):
         self.thread = threading.Thread(target=self.run)
         self.size = size
         self.hashmap = {}
 
     def read(self, key):
-        self.hashmap
+        return self.hashmap.get(key, None)
 
     def write(self, key, value):
+        self.hashmap[key] = value
+
+    def run(self):
         pass
 
 class MockDB(object):
@@ -101,11 +104,11 @@ class RendezvousHashing(object):
 
 def dummy_key_value_pair():
     names = ['dan', 'ben', 'jim', 'joe']
-    return random.choice(names)+str(random.randint(100,999)), ''.join([random.choice(string.printable) for _ in range(20)])
+    return random.choice(names)+str(random.randint(10,99)), ''.join([random.choice(string.ascii_letters+string.digits) for _ in range(20)])
 
 def dummy_key():
     names = ['dan', 'ben', 'jim', 'joe']
-    return random.choice(names)+str(random.randint(100,999))
+    return random.choice(names)+str(random.randint(10,99))
 
 if __name__ == '__main__':
     node1 = MockNode()
@@ -115,5 +118,4 @@ if __name__ == '__main__':
         key, value = dummy_key_value_pair()
         dhash.write(key, value)
         if random.randint(0,5) == 0:
-            dhash.read(dummy_key())
-
+            print(dhash.read(dummy_key()))
