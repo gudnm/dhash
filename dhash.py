@@ -121,28 +121,36 @@ class Resizer(object):
     def resize(self):
         raise NotImplementedError()
 
+    def hash0(self, node_name):
+        return hash(node_name)
+
     def hash1(self, node_name):
         res = 0
         for char in node_name:
             res += 1723**ord(char)
-        return res % 2**64
+        res %= 2**64
+        return res if res % 10 < 5 else -res
 
     def hash2(self, node_name):
         res = 0
         for char in node_name:
             res += 1327**ord(char)
-        return res % 2**64
+        res %= 2**64
+        return res if res % 10 < 5 else -res
 
 class ConsistentHashing(Resizer):
     """Implement a consistent hashing ring."""
     def __init__(self, nodes):
         self.positions = []
         for node in nodes:
-            self.positions.append(self.hash1(node.name))
-            self.positions.append(self.hash2(node.name))
+            self.positions.append((self.hash0(node.name), node.name))
+            self.positions.append((self.hash1(node.name), node.name))
+            self.positions.append((self.hash2(node.name), node.name))
+        self.positions.sort()
+        print(self.positions)
 
     def get_nodeid(self, key):
-        """For now, return 0."""
+        hash(key)
         return 0
 
     def resize(self):
@@ -162,29 +170,28 @@ class RendezvousHashing(Resizer):
 
 def dummy_key_value_pair():
     names = ['dan', 'ben', 'jim', 'joe']
-    return random.choice(names)+str(random.randint(10,99)), ''.join([random.choice(string.ascii_letters+string.digits) for _ in range(20)])
+    return (random.choice(names)+str(random.randint(10,99)), 
+        ''.join([random.choice(string.ascii_letters+string.digits) 
+        for _ in range(20)]))
 
 def dummy_key():
     names = ['dan', 'ben', 'jim', 'joe']
     return random.choice(names)+str(random.randint(10,99))
 
 if __name__ == '__main__':
-    resizer = Resizer()
+    r = Resizer()
     for _ in range(10):
         key = dummy_key()
-        print(key, resizer.hash1(key), resizer.hash2(key))
+        print(key, r.hash0(key), r.hash1(key), r.hash2(key))
 
     node1 = MockNode('Machine 1')
-    assert resizer.hash1(node1.name) == 14738669757681942741
-    assert resizer.hash2(node1.name) == 5343253232099587805
-    assert hash(node1.name) == 3927025894220883735
+    # print(node1.name)
+    print(r.hash0(node1.name))# == -4468146149083681170
+    print(r.hash1(node1.name))# == 14738669757681942741
+    print(r.hash2(node1.name))# == -5343253232099587805
 
     node2 = MockNode('Machine 2')
-    config = {
-                'resizing_method': MockNode,
-                'access_pattern': WriteAround,
-                'evection_strategy': LFU
-            }
+
     dhash = DHash([node1, node2])
     for _ in range(100):
         key, value = dummy_key_value_pair()
