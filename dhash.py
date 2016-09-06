@@ -44,20 +44,19 @@ class DHash(object):
         self.nodes[nodeid].write(self.accessor, key, value)
 
     def add_node(self, node):
-        self.nodes.append(node)
-        self.resizer.resize()
+        self.resizer.add_node(node, self.nodes)
 
     def remove_node(self, node):
-        del self.nodes[node]
-        self.resizer.resize()
+        self.resizer.remove_node(node. self.nodes)
 
 class MockNode(object):
     """Implement a node. 
 
     Node will run in its own thread and emulate a separate machine.
     """
-    def __init__(self, name, size=128):
+    def __init__(self, name, nodeid, size=128):
         self.name = name
+        self.id = nodeid
         self.thread = threading.Thread(target=self.run)
         self.size = size
         self.hashmap = {}
@@ -67,6 +66,25 @@ class MockNode(object):
 
     def write(self, accessor, key, value):
         self.hashmap[key] = value
+
+    def pop(self, start, end):
+        if end < start:
+            # edge case
+            return self.pop(-2**64, end) + self.pop(start, 2**64)
+
+        res = []
+        temp = {}
+        for k, v in self.hashmap.items():
+            if start < hash(k) < end:
+                res.append((k, v))
+            else:
+                temp[k] = v
+        self.hashmap = temp
+        return res
+
+    def push(self, entries):
+        for k, v in entries:
+            self.hashmap[k] = v
 
     def run(self):
         pass
@@ -118,7 +136,10 @@ class Resizer(object):
     def get_nodeid(self, key):
         raise NotImplementedError()
 
-    def resize(self):
+    def add_node(self, node):
+        raise NotImplementedError()
+
+    def remove_node(self, node):
         raise NotImplementedError()
 
     def hash0(self, node_name):
@@ -143,17 +164,39 @@ class ConsistentHashing(Resizer):
     def __init__(self, nodes):
         self.positions = []
         for node in nodes:
-            self.positions.append((self.hash0(node.name), node.name))
-            self.positions.append((self.hash1(node.name), node.name))
-            self.positions.append((self.hash2(node.name), node.name))
+            self.positions.append((self.hash0(node.name), node.id))
+            self.positions.append((self.hash1(node.name), node.id))
+            self.positions.append((self.hash2(node.name), node.id))
         self.positions.sort()
-        print(self.positions)
+        # print(self.positions)
 
     def get_nodeid(self, key):
-        hash(key)
-        return 0
+        key_position = hash(key)
+        for node_position in self.positions:
+            if key_position < node_position[0]:
+                return node_position[1]
+        return self.positions[0][1]
 
-    def resize(self):
+    def add_node(self, node, nodes):
+        nodes.append(node)
+        pos0 = (self.hash0(node.name), node.id)
+        pos1 = (self.hash1(node.name), node.id)
+        pos2 = (self.hash2(node.name), node.id)
+    
+        # figure out which nodes would share some of their load
+        for new_pos in [pos0, pos1, pos2]:
+            for i in range(len(self.positions)):
+                if new_pos[0] < self.positions[i][0]:
+                    aux_node = nodes[self.positions[i][1]]
+                    res = aux_node.pop(new_pos[0], self.positions[i-1][0])
+                    node.push(res)
+
+        for new_pos in [pos0, pos1, pos2]:
+            self.positions.append(new_pos)
+
+        self.positions.sort()
+
+    def remove_node(self, node):
         pass
 
 class RendezvousHashing(Resizer):
@@ -165,7 +208,10 @@ class RendezvousHashing(Resizer):
         """For now, return 0."""
         return 0
 
-    def resize(self):
+    def add_node(self, node):
+        pass
+
+    def remove_node(self, node):
         pass
 
 def dummy_key_value_pair():
@@ -184,17 +230,31 @@ if __name__ == '__main__':
         key = dummy_key()
         print(key, r.hash0(key), r.hash1(key), r.hash2(key))
 
-    node1 = MockNode('Machine 1')
+    node1 = MockNode('Machine 1', 0)
     # print(node1.name)
     print(r.hash0(node1.name))# == -4468146149083681170
     print(r.hash1(node1.name))# == 14738669757681942741
     print(r.hash2(node1.name))# == -5343253232099587805
 
-    node2 = MockNode('Machine 2')
+    node2 = MockNode('Machine 2', 1)
 
     dhash = DHash([node1, node2])
-    for _ in range(100):
+    for _ in range(20):
         key, value = dummy_key_value_pair()
         dhash.write(key, value)
         if random.randint(0,5) == 0:
             print(dhash.read(dummy_key()))
+
+    node3 = MockNode('Machine 3', 1)
+    print('Hashmaps before adding #3')
+    print(len(dhash.nodes))
+    for node in dhash.nodes:
+        print(node.hashmap)
+        print()
+    dhash.add_node(node3)
+    print('Hashmaps after adding #3')
+    print(len(dhash.nodes))
+    for node in dhash.nodes:
+        print(node.name, node.hashmap)
+        print()
+    # dhash.remove_node(1)
