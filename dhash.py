@@ -35,6 +35,20 @@ class DHash(object):
             self.resizer = config['resizing_method'](self.nodes)
         self.accessor = config['access_pattern']()
 
+    def __str__(self):
+        s = [['.'] for _ in range(64)]
+        def maptosixtyfour(num):
+            # num takes range from -2**64 to 2**64
+            # we should get down to -32 to 32 dividing by 2**59
+            num //= 2**59
+            return num+32
+        for pos, nodeid in self.resizer.positions:
+            s[maptosixtyfour(pos)].append(str(nodeid))
+        for node in self.nodes:
+            for k, v in node.hashmap.items():
+                s[maptosixtyfour(hash(k))].append(v + '(' + str(node.id) + ')')
+        return '\n'.join(map(' '.join, s))
+
     def read(self, key):
         nodeid = self.resizer.get_nodeid(key)
         return self.nodes[nodeid].read(self.accessor, key)
@@ -216,13 +230,13 @@ class RendezvousHashing(Resizer):
 
 def dummy_key_value_pair():
     names = ['dan', 'ben', 'jim', 'joe']
-    return (random.choice(names)+str(random.randint(10,99)), 
-        ''.join([random.choice(string.ascii_letters+string.digits) 
-        for _ in range(20)]))
+    words = ["a", "about", "above", "above", "across", "after", "afterwards", "again", "against", "all", "almost", "alone", "along", "already", "also","although","always","am","among", "amongst", "amoungst", "amount",  "an", "and", "another", "any","anyhow","anyone","anything","anyway", "anywhere", "are", "around", "as",  "at", "back","be","became", "because","become","becomes", "becoming", "been", "before", "beforehand", "behind", "being", "below", "beside", "besides", "between", "beyond", "bill", "both", "bottom","but", "by", "call", "can", "cannot", "cant", "co", "con", "could", "couldnt", "cry", "de", "describe", "detail", "do", "done", "down", "due", "during", "each", "eg", "eight", "either", "eleven","else", "elsewhere", "empty", "enough", "etc", "even", "ever", "every", "everyone", "everything", "everywhere", "except", "few", "fifteen", "fify", "fill", "find", "fire", "first", "five", "for", "former", "formerly", "forty", "found", "four", "from", "front", "full", "further", "get", "give", "go", "had", "has", "hasnt", "have", "he", "hence", "her", "here", "hereafter", "hereby", "herein", "hereupon", "hers", "herself", "him", "himself", "his", "how", "however", "hundred", "ie", "if", "in", "inc", "indeed", "interest", "into", "is", "it", "its", "itself", "keep", "last", "latter", "latterly", "least", "less", "ltd", "made", "many", "may", "me", "meanwhile", "might", "mill", "mine", "more", "moreover", "most", "mostly", "move", "much", "must", "my", "myself", "name", "namely", "neither", "never", "nevertheless", "next", "nine", "no", "nobody", "none", "noone", "nor", "not", "nothing", "now", "nowhere", "of", "off", "often", "on", "once", "one", "only", "onto", "or", "other", "others", "otherwise", "our", "ours", "ourselves", "out", "over", "own","part", "per", "perhaps", "please", "put", "rather", "re", "same", "see", "seem", "seemed", "seeming", "seems", "serious", "several", "she", "should", "show", "side", "since", "sincere", "six", "sixty", "so", "some", "somehow", "someone", "something", "sometime", "sometimes", "somewhere", "still", "such", "system", "take", "ten", "than", "that", "the", "their", "them", "themselves", "then", "thence", "there", "thereafter", "thereby", "therefore", "therein", "thereupon", "these", "they", "thickv", "thin", "third", "this", "those", "though", "three", "through", "throughout", "thru", "thus", "to", "together", "too", "top", "toward", "towards", "twelve", "twenty", "two", "un", "under", "until", "up", "upon", "us", "very", "via", "was", "we", "well", "were", "what", "whatever", "when", "whence", "whenever", "where", "whereafter", "whereas", "whereby", "wherein", "whereupon", "wherever", "whether", "which", "while", "whither", "who", "whoever", "whole", "whom", "whose", "why", "will", "with", "within", "without", "would", "yet", "you", "your", "yours", "yourself", "yourselves", "the"]
+    return (random.choice(names)+str(random.randint(1,9)), 
+            ''.join([random.choice(words) for _ in range(3)]))
 
 def dummy_key():
     names = ['dan', 'ben', 'jim', 'joe']
-    return random.choice(names)+str(random.randint(10,99))
+    return random.choice(names)+str(random.randint(1,9))
 
 if __name__ == '__main__':
     r = Resizer()
@@ -245,15 +259,15 @@ if __name__ == '__main__':
         if random.randint(0,5) == 0:
             print(dhash.read(dummy_key()))
 
-    node3 = MockNode('Machine 3', 1)
+    node3 = MockNode('Machine 3', 2)
     print('Hashmaps before adding #3')
-    print(len(dhash.nodes))
+    print(dhash)
     for node in dhash.nodes:
         print(node.hashmap)
         print()
     dhash.add_node(node3)
     print('Hashmaps after adding #3')
-    print(len(dhash.nodes))
+    print(dhash)
     for node in dhash.nodes:
         print(node.name, node.hashmap)
         print()
