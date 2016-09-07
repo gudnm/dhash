@@ -215,22 +215,14 @@ class ConsistentHashing(Resizer):
     
         # figure out which nodes would share some of their load
         for new_pos in new_positions:
+            aux_node_pos = 0
             for i in range(len(self.positions)):
                 if new_pos[0] < self.positions[i][0]:
-                    aux_node = nodes[self.positions[i][1]]
-                    res = aux_node.pop(self.positions[i-1][0], new_pos[0])
-                    node.push(res)
+                    aux_node_pos = i
                     break
-            # when new_pos is bigger than biggest of old positions, nothing happens, however, it should take some of the entries from biggest of old positions... e.g. 
-            # . 0 althoughwethickv(0)
-            # .
-            # ...
-            # . 0 latterneverthence(0)
-            # .
-            # . cannotformerbecame(0)
-            # .
-            # . 2
-            # .
+            aux_node = nodes[self.positions[aux_node_pos][1]]
+            res = aux_node.pop(self.positions[aux_node_pos-1][0], new_pos[0])
+            node.push(res)
 
         for new_pos in new_positions:
             self.positions.append(new_pos)
