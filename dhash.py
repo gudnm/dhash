@@ -63,7 +63,7 @@ class DHash(object):
         self.resizer.add_node(node, self.nodes)
 
     def remove_node(self, node):
-        self.resizer.remove_node(node. self.nodes)
+        self.resizer.remove_node(node, self.nodes)
 
 class MockNode(object):
     """Implement a node. 
@@ -148,6 +148,34 @@ class FIFO(Evictor):
     pass
 
 class Resizer(object):
+    def __init__(self):
+        self.hash_functions = [
+            self._hash0, 
+            self._hash1, 
+            self._hash2
+        ]
+
+    def _custom_hash(self, node_name, prime):
+        res = 0
+        for char in node_name:
+            res += prime**ord(char)
+        res %= 2**63
+        return res if res % 10 < 5 else -res        
+
+    def _hash0(self, node_name):
+        return hash(node_name)
+
+    def _hash1(self, node_name):
+        return self._custom_hash(node_name, 1723)
+
+    def _hash2(self, node_name):
+        return self._custom_hash(node_name, 1327)
+
+    def get_hashes(self, node_name, num=3):
+        res = []
+        for i in range(min(len(self.hash_functions), num)):
+            res.append(self.hash_functions[i](node_name))
+        return res
 
     def get_nodeid(self, key):
         raise NotImplementedError()
@@ -158,33 +186,16 @@ class Resizer(object):
     def remove_node(self, node):
         raise NotImplementedError()
 
-    def hash0(self, node_name):
-        return hash(node_name)
-
-    def hash1(self, node_name):
-        res = 0
-        for char in node_name:
-            res += 1723**ord(char)
-        res %= 2**63
-        return res if res % 10 < 5 else -res
-
-    def hash2(self, node_name):
-        res = 0
-        for char in node_name:
-            res += 1327**ord(char)
-        res %= 2**63
-        return res if res % 10 < 5 else -res
-
 class ConsistentHashing(Resizer):
     """Implement a consistent hashing ring."""
     def __init__(self, nodes):
+        super(ConsistentHashing, self).__init__()
         self.positions = []
         for node in nodes:
-            self.positions.append((self.hash0(node.name), node.id))
-            self.positions.append((self.hash1(node.name), node.id))
-            self.positions.append((self.hash2(node.name), node.id))
+            hashes = self.get_hashes(node.name)
+            for somehash in hashes:
+                self.positions.append((somehash, node.id))
         self.positions.sort()
-        # print(self.positions)
 
     def get_nodeid(self, key):
         key_position = hash(key)
@@ -194,27 +205,44 @@ class ConsistentHashing(Resizer):
         return self.positions[0][1]
 
     def add_node(self, node, nodes):
-        nodes.append(node)
-        pos0 = (self.hash0(node.name), node.id)
-        pos1 = (self.hash1(node.name), node.id)
-        pos2 = (self.hash2(node.name), node.id)
+        nodes.append(node) # modifying list of node objects passed from DHash instance... this doesn't seem like a good idea though
+
+        # I need to generate a bunch of new positions, for now I have 3 hash functions, including the built-in, and all nodes get 3 'locations' in the ring, eventually this needs to be variable where some nodes will get more or less depending on their capacity
+        hashes = self.get_hashes(node.name)
+        new_positions = []
+        for somehash in hashes: 
+            new_positions.append((somehash, node.id))
     
         # figure out which nodes would share some of their load
-        for new_pos in [pos0, pos1, pos2]:
+        for new_pos in new_positions:
             for i in range(len(self.positions)):
                 if new_pos[0] < self.positions[i][0]:
                     aux_node = nodes[self.positions[i][1]]
                     res = aux_node.pop(self.positions[i-1][0], new_pos[0])
                     node.push(res)
                     break
+            # when new_pos is bigger than biggest of old positions, nothing happens, however, it should take some of the entries from biggest of old positions... e.g. 
+            # . 0 althoughwethickv(0)
+            # .
+            # ...
+            # . 0 latterneverthence(0)
+            # .
+            # . cannotformerbecame(0)
+            # .
+            # . 2
+            # .
 
-        for new_pos in [pos0, pos1, pos2]:
+        for new_pos in new_positions:
             self.positions.append(new_pos)
 
         self.positions.sort()
 
-    def remove_node(self, node):
-        pass
+    def remove_node(self, node, nodes):
+        del nodes[node.id]
+        for pos in self.positions:
+            if pos[1] == node.id:
+                # should I pop parts of entries stored at the node being removed and push them into appropriate nodes, or should I traverse all the entries of node being removed and try and figure out where they go?
+                pass
 
 class RendezvousHashing(Resizer):
     """Implement Highest Random Weight hashing method."""
@@ -247,16 +275,12 @@ def dummy_key():
 
 if __name__ == '__main__':
     r = Resizer()
+    print(r.hash_functions)
     for _ in range(10):
         key = dummy_key()
-        print(key, r.hash0(key), r.hash1(key), r.hash2(key))
+        print(key, r.get_hashes(key))
 
     node1 = MockNode('Machine 0', 0)
-    # print(node1.name)
-    print(r.hash0(node1.name))# == -4468146149083681170
-    print(r.hash1(node1.name))# == 14738669757681942741
-    print(r.hash2(node1.name))# == -5343253232099587805
-
     node2 = MockNode('Machine 1', 1)
 
     dhash = DHash([node1, node2])
@@ -280,4 +304,10 @@ if __name__ == '__main__':
     for node in dhash.nodes:
         print(node.name, node.hashmap)
         print()
-    # dhash.remove_node(1)
+    dhash.remove_node(node1)
+    print('Hashmaps after removing #1')
+    print(dhash)
+    print()
+    for node in dhash.nodes:
+        print(node.name, node.hashmap)
+        print()
