@@ -155,6 +155,7 @@ class Resizer(object):
             self._hash2
         ]
 
+    # I need to generate a bunch of new positions, for now I have 3 hash functions, including the built-in, and all nodes get 3 'locations' in the ring, eventually this needs to be variable where some nodes will get more or less depending on their capacity
     def _custom_hash(self, node_name, prime):
         res = 0
         for char in node_name:
@@ -207,7 +208,6 @@ class ConsistentHashing(Resizer):
     def add_node(self, node, nodes):
         nodes.append(node) # modifying list of node objects passed from DHash instance... this doesn't seem like a good idea though
 
-        # I need to generate a bunch of new positions, for now I have 3 hash functions, including the built-in, and all nodes get 3 'locations' in the ring, eventually this needs to be variable where some nodes will get more or less depending on their capacity
         hashes = self.get_hashes(node.name)
         new_positions = []
         for somehash in hashes: 
