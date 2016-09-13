@@ -1,6 +1,8 @@
+from Resizer import Resizer
+
 class RendezvousHashing(Resizer):
     """Implement Highest Random Weight hashing method."""
-    def __init__(self):
+    def __init__(self, nodes):
         pass
 
     def get_nodeid(self, key, nodes):

@@ -1,6 +1,6 @@
 class Resizer(object):
 
-    def get_nodeid(self, key):
+    def get_nodeid(self, key, nodes):
         raise NotImplementedError()
 
     def add_node(self, node, nodes):

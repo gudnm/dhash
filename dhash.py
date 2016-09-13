@@ -3,21 +3,18 @@ from ConsistentHashing import ConsistentHashing
 from Accessor import Accessor, WriteAround
 from Evictor import LFU
 
-DEFAULT_CONFIG = {
-    'resizing_method': ConsistentHashing,
-    'access_pattern': WriteAround,
-    'evection_strategy': LFU
-}
-
 class DHash(object):
-    def __init__(self, nodes, config=None):
+    def __init__(self, nodes, 
+                 resizing_method=ConsistentHashing, 
+                 access_pattern=WriteAround, 
+                 evection_strategy=LFU):
         self.nodes = nodes
-        if not config:
-            config = DEFAULT_CONFIG
-        assert issubclass(config['resizing_method'], Resizer)
-        self.resizer = config['resizing_method'](self.nodes)
-        assert issubclass(config['access_pattern'], Accessor)
-        self.accessor = config['access_pattern']()
+        assert issubclass(resizing_method, Resizer)
+        self.resizer = resizing_method(self.nodes)
+        assert issubclass(access_pattern, Accessor)
+        self.accessor = access_pattern()
+        assert issubclass(evection_strategy, LFU)
+        self.accessor = evection_strategy ()
 
     def read(self, key):
         nodeid = self.resizer.get_nodeid(key)
