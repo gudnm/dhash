@@ -4,6 +4,7 @@ class MockNode(object):
     """Implement a node. 
 
     Node will run in its own thread and emulate a separate machine.
+    Eventually :)
     """
     def __init__(self, name, nodeid, size=128):
         self.name = name

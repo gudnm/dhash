@@ -11,6 +11,7 @@ class ConsistentHashing(Resizer):
         self.positions.sort()
 
     def get_nodeid(self, key):
+        """Find the node to use for the given key's storage."""
         key_position = hash(key)
         for node_position in self.positions:
             if key_position < node_position[0]:
@@ -19,7 +20,7 @@ class ConsistentHashing(Resizer):
 
     def do_add_node(self, node, nodes):
         pops = {}
-        hashes = self.get_hashes(node.name)
+        hashes = self.hashes(node.name)
         new_positions = []
         for somehash in hashes: 
             new_positions.append((somehash, node.id))

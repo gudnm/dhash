@@ -32,7 +32,7 @@ class Resizer(object):
     def get_nodeid(self, key):
         raise NotImplementedError()
 
-    def add_node(self, node):
+    def add_node(self, node, nodes):
         raise NotImplementedError()
 
     def remove_node(self, node):
