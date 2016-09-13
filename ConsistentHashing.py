@@ -45,5 +45,5 @@ class ConsistentHashing(Resizer):
         self.positions.sort()
         return pops        
 
-    def remove_node(self, node):
+    def get_storage(self, node):
         return node.hashmap

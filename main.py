@@ -19,7 +19,7 @@
 import random
 import string
 import pdb
-from dhash import DHash
+from DHash import DHash
 from MockNode import MockNode
 from Resizer import Resizer
 from ConsistentHashing import ConsistentHashing

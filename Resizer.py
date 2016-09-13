@@ -35,5 +35,5 @@ class Resizer(object):
     def add_node(self, node, nodes):
         raise NotImplementedError()
 
-    def remove_node(self, node):
+    def get_storage(self, node):
         raise NotImplementedError()

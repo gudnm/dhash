@@ -41,7 +41,7 @@ class DHash(object):
         """Remove a node from dhash using current resizer."""
         
         # just take entire node's storage
-        pushes = self.resizer.remove_node(node)
+        pushes = self.resizer.get_storage(node)
 
         for key, value in pushes.items():
             self.write(key, value)
