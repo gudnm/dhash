@@ -1,2 +1,2 @@
 # dhash
-Distributed hash table
+Distributed hash table implementation in Python
