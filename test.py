@@ -57,13 +57,13 @@ class ConsistentHashingTest(unittest.TestCase):
 		node_id = self.resizer.get_nodeid(self.node.name)
 		self.assertEqual(node_id, 0)
 
-	def test_add_node(self):
-		self.another_node = Node('Node #1', 1)
-		pops = self.resizer.add_node(self.another_node)
-		self.assertEqual(len(pops), 1)
-
 	def test_do_add_node(self):
-		pass
+		new_node = Node('Node #1', 1)
+		positions, updates = self.resizer.do_add_node(new_node)
+		self.assertEqual(len(positions), 3)
+		print(positions) 
+		print(updates)
+		self.assertEqual(len(updates), 3)
 
 	def test_get_storage(self):
 		storage = self.resizer.get_storage(self.node)
@@ -83,8 +83,8 @@ class RendezvousHashingTest(unittest.TestCase):
 
 	def test_add_node(self):
 		self.another_node = Node('Node #1', 1)
-		pops = self.resizer.add_node(self.another_node, self.dhash.nodes)
-		self.assertEqual(pops, {})
+		updates = self.resizer.add_node(self.another_node, self.dhash.nodes)
+		self.assertEqual(updates, {})
 
 	def test_get_storage(self):
 		storage = self.resizer.get_storage(self.node)

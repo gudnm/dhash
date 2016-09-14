@@ -33,16 +33,16 @@ class ConsistentHashing(Resizer):
         return self.positions[0][1]
 
     def do_add_node(self, node):
-        """Calculate set of positions for new node, and updates.
+        """Calculate set of positions for new node, and ranges.
 
         Part of 'Functional Core'. Returns positions to add for the new node,
-        as well as updates that will need to be processed by DHash object - 
-        a dictionary where key is node_id and value is a tuple with start and
-        end of range of hashes to pluck the entries from.
+        as well as ranges that will need to be processed by DHash object - 
+        a tuple where first element is node_id and second element is a tuple 
+        with start and end of range of hashes to pluck the entries from.
         """
-        updates = {}
-        hashes = self.hashes(node.name)
         new_positions = []
+        ranges = []
+        hashes = self.hashes(node.name)
         for somehash in hashes: 
             new_positions.append((somehash, node.id))
     
@@ -54,17 +54,18 @@ class ConsistentHashing(Resizer):
                     aux_node_pos = i
                     break
             aux_node_id = self.positions[aux_node_pos][1]
-            updates[aux_node_id] = (self.positions[aux_node_pos-1][0], new_pos[0])
+            ranges.append((aux_node_id, 
+                            (self.positions[aux_node_pos-1][0], new_pos[0])))
 
-        return new_positions, updates
+        return new_positions, ranges
 
     def add_node(self, node):
-        new_positions, updates = self.do_add_node(node)
+        new_positions, ranges = self.do_add_node(node)
         for new_pos in new_positions:
             self.positions.append(new_pos)
 
         self.positions.sort()
-        return updates        
+        return ranges        
 
     def get_storage(self, node):
         return node.hashmap
