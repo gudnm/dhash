@@ -1,10 +1,14 @@
 import threading
 
 class MockNode(object):
-    """Implement a node. 
+    """Implements a node. 
 
     Node will run in its own thread and emulate a separate machine.
     Eventually :)
+
+    Part of 'Imperative Shell', does destructive operations on node's
+    storage, like writing to it and updating the information related
+    to eviction strategies, like frequencies counts, use order...
     """
     def __init__(self, name, nodeid, size=128):
         self.name = name

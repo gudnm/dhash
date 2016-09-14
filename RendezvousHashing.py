@@ -1,7 +1,11 @@
 from Resizer import Resizer
 
 class RendezvousHashing(Resizer):
-    """Implement Highest Random Weight hashing method."""
+    """Implement Highest Random Weight hashing method.
+
+    Part of 'Functional Core' - methods of this class don't change
+    any state or objects, all they do is take values and return values.
+    """
     def __init__(self, nodes):
         pass
 
@@ -16,12 +20,18 @@ class RendezvousHashing(Resizer):
     def add_node(self, node, nodes):
         """Nothing is done when a new node is added.
 
-         If a new site Sn+1 is added, new object placements or requests will compute n+1 hash values, and pick the largest of these. If an object already in the system at Sk maps to this new site Sn+1, it will be fetched afresh and cached at Sn+1. All clients will henceforth obtain it from this site, and the old cached copy at Sk will ultimately be replaced by the local cache management algorithm."""
+         If a new site Sn+1 is added, new object placements or requests will 
+         compute n+1 hash values, and pick the largest of these. If an object 
+         already in the system at Sk maps to this new site Sn+1, it will be 
+         fetched afresh and cached at Sn+1. All clients will henceforth obtain
+         it from this site, and the old cached copy at Sk will ultimately be 
+         replaced by the local cache management algorithm."""
         return {}
 
     def get_storage(self, node):
         """Take all key-value pairs from this node.
 
-        If Sk is taken offline, its objects will be remapped uniformly to the remaining n-1 sites."""
+        If Sk is taken offline, its objects will be remapped uniformly to the 
+        remaining n-1 sites."""
         return node.hashmap
 

@@ -1,7 +1,13 @@
 from Resizer import Resizer
 
 class ConsistentHashing(Resizer):
-    """Implement a consistent hashing ring."""
+    """Implement a consistent hashing ring.
+
+    Part of 'Functional Core' - methods of this class don't change
+    any state or objects, all they do is take values and return values.
+    E.g. add_node will take new node and all existing nodes and return
+    the ranges in existing nodes from which to take key-value pair for
+    the new node to insert. Insertion itself is done by the Node."""
     def __init__(self, nodes):
         super(ConsistentHashing, self).__init__()
         self.hash_functions = [
