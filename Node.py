@@ -1,6 +1,6 @@
 import threading
 
-class MockNode(object):
+class Node(object):
     """Implements a node. 
 
     Node will run in its own thread and emulate a separate machine.

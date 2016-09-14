@@ -1,6 +1,6 @@
 import unittest
 from DHash import DHash
-from MockNode import MockNode
+from Node import Node
 from Resizer import Resizer
 from Client import Client
 from ConsistentHashing import ConsistentHashing
@@ -20,7 +20,7 @@ class ConsistentHashingTest(unittest.TestCase):
 	"""docstring for ConsistentHashingTest"""
 
 	def setUp(self):
-		self.node = MockNode('Node #0', 0)
+		self.node = Node('Node #0', 0)
 		self.dhash = DHash([self.node], resizing_method=ConsistentHashing)
 		self.resizer = self.dhash.resizer
 		self.client = Client()
@@ -35,7 +35,7 @@ class ConsistentHashingTest(unittest.TestCase):
 		self.assertEqual(node_id, 0)
 
 	def test_add_node(self):
-		self.another_node = MockNode('Node #1', 1)
+		self.another_node = Node('Node #1', 1)
 		pops = self.resizer.add_node(self.another_node)
 		self.assertEqual(len(pops), 1)
 
@@ -50,7 +50,7 @@ class RendezvousHashingTest(unittest.TestCase):
 	"""docstring for RendezvousHashingTest"""
 
 	def setUp(self):
-		self.node = MockNode('Node #0', 0)
+		self.node = Node('Node #0', 0)
 		self.dhash = DHash([self.node], resizing_method=RendezvousHashing)
 		self.resizer = self.dhash.resizer
 
@@ -59,7 +59,7 @@ class RendezvousHashingTest(unittest.TestCase):
 		self.assertEqual(node_id, 0)
 
 	def test_add_node(self):
-		self.another_node = MockNode('Node #1', 1)
+		self.another_node = Node('Node #1', 1)
 		pops = self.resizer.add_node(self.another_node, self.dhash.nodes)
 		self.assertEqual(pops, {})
 

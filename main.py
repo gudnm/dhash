@@ -20,7 +20,7 @@ import random
 import string
 import pdb
 from DHash import DHash
-from MockNode import MockNode
+from Node import Node
 from Resizer import Resizer
 from ConsistentHashing import ConsistentHashing
 from MockDB import MockDB
@@ -34,8 +34,8 @@ if __name__ == '__main__':
         key = client.dummy_key()
         print(key, r.hashes(key))
 
-    node1 = MockNode('Machine 0', 0)
-    node2 = MockNode('Machine 1', 1)
+    node1 = Node('Machine 0', 0)
+    node2 = Node('Machine 1', 1)
 
     dhash = DHash([node1, node2])
     for _ in range(10):
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         if random.randint(0,5) == 0:
             print(dhash.read(client.dummy_key()))
 
-    node3 = MockNode('Machine 2', 2)
+    node3 = Node('Machine 2', 2)
     print('Hashmaps before adding #2')
     print(dhash)
     print()
