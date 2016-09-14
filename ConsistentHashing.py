@@ -15,7 +15,7 @@ class ConsistentHashing(Resizer):
                 self.positions.append((somehash, node.id))
         self.positions.sort()
 
-    def get_nodeid(self, key, nodes):
+    def get_nodeid(self, key):
         """Find the node to use for the given key's storage."""
         key_position = hash(key)
         for node_position in self.positions:

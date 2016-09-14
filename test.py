@@ -6,6 +6,16 @@ from Client import Client
 from ConsistentHashing import ConsistentHashing
 from RendezvousHashing import RendezvousHashing
 
+class ClientTest(unittest.TestCase):
+	def setUp(self):
+		self.client = Client()
+
+	def test_key_value(self):
+		self.assertEqual(len(self.client.dummy_key_value_pair()), 2)
+
+	def test_key_value(self):
+		self.assertEqual(len(self.client.dummy_key()), 4)
+
 class ConsistentHashingTest(unittest.TestCase):
 	"""docstring for ConsistentHashingTest"""
 
@@ -21,7 +31,7 @@ class ConsistentHashingTest(unittest.TestCase):
 		self.assertEqual(len(hashes), 3)
 
 	def test_nodeid(self):
-		node_id = self.resizer.get_nodeid(self.node.name, self.dhash.nodes)
+		node_id = self.resizer.get_nodeid(self.node.name)
 		self.assertEqual(node_id, 0)
 
 	def test_add_node(self):
@@ -31,7 +41,7 @@ class ConsistentHashingTest(unittest.TestCase):
 
 	def test_get_storage(self):
 		storage = self.resizer.get_storage(self.node)
-		self.assertEqual(storage, {})
+		self.assertEqual(len(storage), 1)
 
 class RendezvousHashingTest(unittest.TestCase):
 	"""docstring for RendezvousHashingTest"""
