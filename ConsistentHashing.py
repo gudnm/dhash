@@ -8,7 +8,7 @@ class ConsistentHashing(Resizer):
     E.g. add_node will take new node and all existing nodes and return
     the ranges in existing nodes from which to take key-value pair for
     the new node to insert. Insertion itself is done by the Node.
-    
+
     Exception: add_node() method that updates self.positions property
     """
     def __init__(self, nodes):
@@ -33,6 +33,13 @@ class ConsistentHashing(Resizer):
         return self.positions[0][1]
 
     def do_add_node(self, node):
+        """Calculate set of positions for new node, and updates.
+
+        Part of 'Functional Core'. Returns positions to add for the new node,
+        as well as updates that will need to be processed by DHash object - 
+        a dictionary where key is node_id and value is a tuple with start and
+        end of range of hashes to pluck the entries from.
+        """
         updates = {}
         hashes = self.hashes(node.name)
         new_positions = []

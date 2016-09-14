@@ -16,11 +16,18 @@ class NodeTest(unittest.TestCase):
 			'do5': 'fillbutthat' #-1925086808205474881 (12)
 		}
 
-	def test_do_pop(self):
-		updates, new_storage = self.node.do_pop(3434016154199216269, -3199944916903827109)
-		#print(updates, new_storage)
+	def test_do_pop_over_the_edge(self):
+		updates, new_storage = self.node.do_pop(3434016154199216269, 
+												-3199944916903827109)
 		self.assertEqual(len(updates), 2)
 		self.assertEqual(len(new_storage), 2)
+
+	def test_do_pop(self):
+		updates, new_storage = self.node.do_pop(-3199944916903827199, 
+												3434016154199216269)
+		self.assertEqual(len(updates), 3)
+		self.assertEqual(len(new_storage), 1)
+
 
 class ClientTest(unittest.TestCase):
 	def setUp(self):
