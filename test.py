@@ -36,8 +36,11 @@ class ConsistentHashingTest(unittest.TestCase):
 
 	def test_add_node(self):
 		self.another_node = MockNode('Node #1', 1)
-		pops = self.resizer.add_node(self.another_node, self.dhash.nodes)
+		pops = self.resizer.add_node(self.another_node)
 		self.assertEqual(len(pops), 1)
+
+	def test_do_add_node(self):
+		pass
 
 	def test_get_storage(self):
 		storage = self.resizer.get_storage(self.node)

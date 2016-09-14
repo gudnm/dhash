@@ -29,9 +29,9 @@ class DHash(object):
         self.nodes.append(node)
 
         # key-value pairs where key is node_id and value is a tuple with range of hashes
-        pops = self.resizer.add_node(node, self.nodes)
+        updates = self.resizer.add_node(node)
 
-        for node_id, (start, end) in pops.items():
+        for node_id, (start, end) in updates.items():
             node.push(self.nodes[node_id].pop(start, end))
 
     def remove_node(self, node):

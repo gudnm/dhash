@@ -7,7 +7,10 @@ class ConsistentHashing(Resizer):
     any state or objects, all they do is take values and return values.
     E.g. add_node will take new node and all existing nodes and return
     the ranges in existing nodes from which to take key-value pair for
-    the new node to insert. Insertion itself is done by the Node."""
+    the new node to insert. Insertion itself is done by the Node.
+    
+    Exception: add_node() method that updates self.positions property
+    """
     def __init__(self, nodes):
         super(ConsistentHashing, self).__init__()
         self.hash_functions = [
@@ -29,8 +32,8 @@ class ConsistentHashing(Resizer):
                 return node_position[1]
         return self.positions[0][1]
 
-    def do_add_node(self, node, nodes):
-        pops = {}
+    def do_add_node(self, node):
+        updates = {}
         hashes = self.hashes(node.name)
         new_positions = []
         for somehash in hashes: 
@@ -44,23 +47,29 @@ class ConsistentHashing(Resizer):
                     aux_node_pos = i
                     break
             aux_node_id = self.positions[aux_node_pos][1]
-            pops[aux_node_id] = (self.positions[aux_node_pos-1][0], new_pos[0])
+            updates[aux_node_id] = (self.positions[aux_node_pos-1][0], new_pos[0])
 
-        return new_positions, pops
+        return new_positions, updates
 
-    def add_node(self, node, nodes):
-        new_positions, pops = self.do_add_node(node, nodes)
+    def add_node(self, node):
+        new_positions, updates = self.do_add_node(node)
         for new_pos in new_positions:
             self.positions.append(new_pos)
 
         self.positions.sort()
-        return pops        
+        return updates        
 
     def get_storage(self, node):
         return node.hashmap
 
-    # I need to generate a bunch of new positions, for now I have 3 hash functions, including the built-in, and all nodes get 3 'locations' in the ring, eventually this needs to be variable where some nodes will get more or less depending on their capacity
     def _custom_hash(self, node_name, prime):
+        """Takes a prime and generates semi-decent hash.
+
+        I need to generate a bunch of new positions, for now I have 3 hash 
+        functions, including the built-in, and all nodes get 3 'locations' in 
+        the ring, eventually this needs to be variable where some nodes 
+        will get more or less depending on their capacity.
+        """
         res = 0
         for char in node_name:
             res += prime**ord(char)

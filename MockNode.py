@@ -6,9 +6,9 @@ class MockNode(object):
     Node will run in its own thread and emulate a separate machine.
     Eventually :)
 
-    Part of 'Imperative Shell', does destructive operations on node's
-    storage, like writing to it and updating the information related
-    to eviction strategies, like frequencies counts, use order...
+    Part of 'Imperative Shell' (except the do_pop() method), does destructive 
+    operations on node's storage and updates the information related to 
+    eviction strategies, like frequencies counts, use order...
     """
     def __init__(self, name, nodeid, size=128):
         self.name = name
@@ -23,20 +23,23 @@ class MockNode(object):
     def write(self, accessor, key, value):
         self.hashmap[key] = value
 
-    def pop(self, start, end):
+    def do_pop(self, start, end):
         if end < start:
-            # edge case
-            return self.pop(-2**63, end) + self.pop(start, 2**63)
-        # pdb.set_trace()
-        res = []
-        temp = {}
+            left_updates, left_storage = self.pop(-2**63, end)
+            right_updates, right_storage = self.pop(start, 2**63)
+            return left_updates + right_updates, left_storage + right_storage
+        updates = []
+        new_storage = {}
         for k, v in self.hashmap.items():
             if start < hash(k) < end:
-                res.append((k, v))
+                updates.append((k, v))
             else:
-                temp[k] = v
-        self.hashmap = temp
-        return res
+                new_storage[k] = v   
+        return updates, new_storage     
+
+    def pop(self, start, end):
+        updates, self.hashmap = self.do_pop(start, end)
+        return updates
 
     def push(self, entries):
         self.hashmap.update(entries)
