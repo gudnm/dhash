@@ -24,10 +24,13 @@ class Node(object):
         self.hashmap[key] = value
 
     def do_pop(self, start, end):
+        """Part of 'Functional Core', does not update state, just returns."""
         if end < start:
-            left_updates, left_storage = self.pop(-2**63, end)
-            right_updates, right_storage = self.pop(start, 2**63)
-            return left_updates + right_updates, left_storage + right_storage
+            left_updates, left_storage = self.do_pop(-2**63, end)
+            right_updates, right_storage = self.do_pop(start, 2**63)
+            new_storage = {x: left_storage[x] for x in left_storage 
+                                                  if x in right_storage}
+            return left_updates + right_updates, new_storage
         updates = []
         new_storage = {}
         for k, v in self.hashmap.items():

@@ -6,6 +6,22 @@ from Client import Client
 from ConsistentHashing import ConsistentHashing
 from RendezvousHashing import RendezvousHashing
 
+class NodeTest(unittest.TestCase):
+	def setUp(self):
+		self.node = Node('Node #0', 0)
+		self.node.hashmap = {
+			'myself4': 'alreadynoonethough',  #-3199944916903827169 (10)
+			'yours2': 'thinbeyondwere', # 3759286853173002204 (22)
+			'ourselves0': 'towardshundredhad', # 3434016154199216262 (21)
+			'do5': 'fillbutthat' #-1925086808205474881 (12)
+		}
+
+	def test_do_pop(self):
+		updates, new_storage = self.node.do_pop(3434016154199216269, -3199944916903827109)
+		#print(updates, new_storage)
+		self.assertEqual(len(updates), 2)
+		self.assertEqual(len(new_storage), 2)
+
 class ClientTest(unittest.TestCase):
 	def setUp(self):
 		self.client = Client()
@@ -14,7 +30,7 @@ class ClientTest(unittest.TestCase):
 		self.assertEqual(len(self.client.dummy_key_value_pair()), 2)
 
 	def test_key_value(self):
-		self.assertEqual(len(self.client.dummy_key()), 4)
+		self.assertTrue(len(self.client.dummy_key()))
 
 class ConsistentHashingTest(unittest.TestCase):
 	"""docstring for ConsistentHashingTest"""

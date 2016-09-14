@@ -27,7 +27,7 @@ from MockDB import MockDB
 from Client import Client
 
 if __name__ == '__main__':
-    r = ConsistentHashing()
+    r = ConsistentHashing([])
     client = Client()
     # print(r.hash_functions)
     for _ in range(10):
