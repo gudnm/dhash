@@ -1,20 +1,20 @@
 from Resizer import Resizer
 from ConsistentHashing import ConsistentHashing 
 from Accessor import Accessor, WriteAround
-from Evictor import LFU
+from Evictor import LFU, FIFO
 
 class DHash(object):
     def __init__(self, nodes, 
                  resizing_method=ConsistentHashing, 
                  access_pattern=WriteAround, 
-                 evection_strategy=LFU):
+                 eviction_strategy=FIFO):
         self.nodes = nodes
         assert issubclass(resizing_method, Resizer)
         self.resizer = resizing_method(self.nodes)
         assert issubclass(access_pattern, Accessor)
         self.accessor = access_pattern()
-        assert issubclass(evection_strategy, LFU)
-        self.accessor = evection_strategy ()
+        assert issubclass(eviction_strategy, FIFO)
+        self.accessor = eviction_strategy()
 
     def read(self, key):
         nodeid = self.resizer.get_nodeid(key)
@@ -28,7 +28,8 @@ class DHash(object):
         """Add a node to dhash using current resizer."""
         self.nodes.append(node)
 
-        # key-value pairs where key is node_id and value is a tuple with range of hashes
+        # key-value pairs where key is node_id
+        # and value is a tuple with range of hashes
         ranges = self.resizer.add_node(node)
 
         for node_id, (start, end) in ranges:

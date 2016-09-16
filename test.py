@@ -3,6 +3,7 @@ from DHash import DHash
 from Node import Node
 from Resizer import Resizer
 from Client import Client
+from Evictor import FIFO
 from ConsistentHashing import ConsistentHashing
 from RendezvousHashing import RendezvousHashing
 

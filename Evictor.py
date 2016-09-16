@@ -2,10 +2,7 @@ class Evictor(object):
     def __init__(self):
         pass
 
-    def update_on_read(self):
-        pass
-
-    def remove_for_write(self):
+    def get_evictions(self):
         pass
 
 class LRU(Evictor):
@@ -18,4 +15,9 @@ class LFU(Evictor):
 
 class FIFO(Evictor):
     """Implement First-In-First-Out eviction strategy."""
-    pass
+    def __init__(self):
+        pass
+    def get_evictions(self, node, key):
+        evictions = []
+        
+        return evictions

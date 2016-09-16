@@ -1,4 +1,5 @@
 import threading
+import time
 
 class Node(object):
     """Implements a node. 
@@ -18,10 +19,15 @@ class Node(object):
         self.hashmap = {}
 
     def read(self, accessor, key):
-        return self.hashmap.get(key, None)
+        to_evict = accessor.get_evictions(self, key)
+        res = self.hashmap.get(key, None)[0]
+        for key in to_evict:
+            del self.hashmap[key]
+        return res
 
     def write(self, accessor, key, value):
-        self.hashmap[key] = value
+        timestamp = time.time()
+        self.hashmap[key] = (value, timestamp)
 
     def do_pop(self, start, end):
         """Part of 'Functional Core', does not update state, just returns."""
