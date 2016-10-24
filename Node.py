@@ -20,7 +20,10 @@ class Node(object):
 
     def read(self, accessor, key):
         to_evict = accessor.get_evictions(self, key)
-        res = self.hashmap.get(key, None)[0]
+        value = self.hashmap.get(key, None)
+        res = None
+        if value:
+            res = value[0]
         for key in to_evict:
             del self.hashmap[key]
         return res

@@ -51,15 +51,18 @@ class DHash(object):
 
     def __str__(self):
         s = [['.'] for _ in range(32)]
-        def maptothirtytwo(num):
-            # num takes range from -2**63 to 2**63-1
-            # we should get down to 0 to 31 via
-            # dividing by 2**59 and adding 16
+        def maptorange(num):
+            # just for illustration, let's print the positions of nodes and
+            # hashes; num takes range from -2**63 to 2**63-1, we should get 
+            # down to # 0 to 31 via dividing by 2**59 and adding 16
             num //= 2**59
             return num+16
+
         for pos, nodeid in self.resizer.positions:
-            s[maptothirtytwo(pos)].append(str(nodeid))
+            s[maptorange(pos)].append(str(nodeid))
+
         for node in self.nodes:
             for k, v in node.hashmap.items():
-                s[maptothirtytwo(hash(k))].append(v + '(' + str(node.id) + ')')
+                s[maptorange(hash(k))].append(v[0] + '(' + str(node.id) + ')')
+
         return '\n'.join(map(' '.join, s))
